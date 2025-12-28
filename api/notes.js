@@ -1,28 +1,14 @@
-import dns from "dns";
-dns.setDefaultResultOrder("ipv4first");
-
 import { Pool } from "pg";
 
 let pool;
 
 // Reuse the pool across invocations (best-effort)
 function getPool() {
-  const cs = process.env.DATABASE_URL;
-
-  if (!cs) throw new Error("DATABASE_URL is not set");
-
-  // Optional: log only the host for debugging
-  try {
-    const u = new URL(cs);
-    console.log("DB host:", u.hostname);
-  } catch {
-    console.log("DATABASE_URL is not a valid URL connection string");
+  if (!pool) {
+    pool = new Pool({ connectionString: process.env.DATABASE_URL });
   }
-
-  if (!pool) pool = new Pool({ connectionString: cs });
   return pool;
 }
-
 
 export default async function handler(req, res) {
   try {
@@ -51,5 +37,4 @@ export default async function handler(req, res) {
     console.error(err);
     return res.status(500).json({ error: "Server error" });
   }
-}
-
+}              
